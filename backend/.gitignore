@@ -1,5 +1,0 @@
-.env
-venv
-_pycache__/
-logs/
-agrichain.db
