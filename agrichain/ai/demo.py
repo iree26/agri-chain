@@ -19,6 +19,7 @@ load_dotenv(env_path)
 
 from agrichain.ai.agents.orchestrator import OrchestratorAgent
 from agrichain.ai.utils.sanitizer import NIGERIAN_STATES, NIGERIAN_CROPS
+from agrichain.ai.utils.soil_recommender import SOIL_TYPES, FERTILIZATION_METHODS, get_soil_type_description
 
 
 def get_farmer_input():
@@ -67,6 +68,37 @@ def get_farmer_input():
         except ValueError:
             print("Please enter a valid number")
 
+    # Soil type
+    print("\nSelect your soil type:")
+    for i, st in enumerate(SOIL_TYPES, 1):
+        desc = get_soil_type_description(st)
+        print(f"  {i}. {st} - {desc}")
+
+    while True:
+        try:
+            st_choice = int(input("Soil type choice (1-6): ").strip())
+            if 1 <= st_choice <= len(SOIL_TYPES):
+                soil_type = SOIL_TYPES[st_choice - 1]
+                break
+            print(f"Please enter a number between 1 and {len(SOIL_TYPES)}")
+        except ValueError:
+            print("Please enter a valid number")
+
+    # Fertilization method
+    print("\nSelect your current fertilization method:")
+    for i, fm in enumerate(FERTILIZATION_METHODS, 1):
+        print(f"  {i}. {fm}")
+
+    while True:
+        try:
+            fm_choice = int(input("Fertilization method choice (1-4): ").strip())
+            if 1 <= fm_choice <= len(FERTILIZATION_METHODS):
+                fertilization_method = FERTILIZATION_METHODS[fm_choice - 1]
+                break
+            print(f"Please enter a number between 1 and {len(FERTILIZATION_METHODS)}")
+        except ValueError:
+            print("Please enter a valid number")
+
     # Language
     print("\nSelect your preferred language:")
     languages = {
@@ -86,7 +118,7 @@ def get_farmer_input():
             break
         print("Please enter 1, 2, 3, or 4")
 
-    return name, state, lga, crop, farm_size, language
+    return name, state, lga, crop, farm_size, soil_type, fertilization_method, language
 
 
 def get_language_labels(language: str):
@@ -183,6 +215,8 @@ def display_plan_header(result):
 
     print(f"Crop: {result.get('crop', 'Unknown')}")
     print(f"Farm Size: {result.get('farm_size', 'Unknown')} hectares")
+    print(f"Soil Type: {result.get('soil_type', 'N/A')}")
+    print(f"Fertilization: {result.get('fertilization_method', 'N/A')}")
     print(f"Language: {result.get('language', 'English')}")
 
     print("=" * 60)
@@ -201,7 +235,7 @@ async def run_demo():
 
     while True:
 
-        name, state, lga, crop, farm_size, language = get_farmer_input()
+        name, state, lga, crop, farm_size, soil_type, fertilization_method, language = get_farmer_input()
 
         print("\n" + "-" * 60)
         print("Generating your personalized farm plan...")
@@ -216,7 +250,9 @@ async def run_demo():
                     crop=crop,
                     farm_size=str(farm_size),
                     language=language,
-                    stream_callback=stream_callback
+                    stream_callback=stream_callback,
+                    soil_type=soil_type,
+                    fertilization_method=fertilization_method
                 ),
                 timeout=30
             )

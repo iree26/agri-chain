@@ -30,7 +30,9 @@ def main():
             lga="Ngaski",
             crop="Rice",
             farm_size="2",
-            language="Hausa"
+            language="Hausa",
+            soil_type="Loamy",
+            fertilization_method="Mixed (both organic and inorganic)"
         )
     )
     
@@ -42,11 +44,16 @@ def main():
         print(f"Location: {result['lga']}, {result['state']}")
         print(f"Crop: {result['crop']}")
         print(f"Farm Size: {result['farm_size']} hectares")
+        print(f"Soil Type: {result.get('soil_type', 'N/A')}")
+        print(f"Fertilization: {result.get('fertilization_method', 'N/A')}")
         print(f"Language: {result['language']}")
         print("="*60)
         print(result["farm_plan"])
         print("="*60)
         print(f"Execution time: {result['execution_times']['total']}")
+        exported = result.get("exported_files", {})
+        if exported:
+            print(f"Files exported: {exported.get('docx', 'N/A')}, {exported.get('pdf', 'N/A')}")
     else:
         print(f"Error: {result['error']}")
         print(result.get("details", {}))

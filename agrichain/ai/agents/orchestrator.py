@@ -16,6 +16,8 @@ from agrichain.ai.agents.weather_agent import WeatherAgent
 from agrichain.ai.agents.market_agent import MarketAgent
 from agrichain.ai.agents.finance_agent import FinanceAgent
 from agrichain.ai.utils.sanitizer import validate_all_inputs
+from agrichain.ai.utils.soil_recommender import get_soil_recommendation, SOIL_TYPES, FERTILIZATION_METHODS
+from agrichain.ai.utils.file_generator import save_farm_plan_files
 
 env_path = Path(__file__).parent.parent.parent.parent / ".env"
 load_dotenv(env_path)
@@ -98,27 +100,32 @@ class OrchestratorAgent:
             "English": {
                 "what_to_do": "WHAT TO DO THIS WEEK",
                 "when_where_sell": "WHEN AND WHERE TO SELL",
-                "financing": "FINANCING OPTIONS"
+                "financing": "FINANCING OPTIONS",
+                "fertilization": "FERTILIZATION RECOMMENDATIONS"
             },
             "Yoruba": {
                 "what_to_do": "KINI LATI ṢE Ọ̀SẸ̀ YÌÍ",
                 "when_where_sell": "NÍGBÀ ATI NÍBO LÁTI TA",
-                "financing": "ÀWỌN ÀṢẸJỌ̀ FUN ÌSÚNÁWÓ"
+                "financing": "ÀWỌN ÀṢẸJỌ̀ FUN ÌSÚNÁWÓ",
+                "fertilization": "ÀWỌN ÌMỌ̀RÀN LÓRÍ AJILE"
             },
             "Hausa": {
                 "what_to_do": "ABINDA ZA A YI A WANNAN MAKO",
                 "when_where_sell": "YA YAKE A SAYARWA",
-                "financing": "ZAƊI NA KUƊI"
+                "financing": "ZAƊI NA KUƊI",
+                "fertilization": "SHAWARAR TAKI"
             },
             "Igbo": {
                 "what_to_do": "IHE IGA EME IZUUKA A",
                 "when_where_sell": "EBE NA OGE EZI AHIA",
-                "financing": "NDỊ EKWERE INYE EGO"
+                "financing": "NDỊ EKWERE INYE EGO",
+                "fertilization": "NTUZIAKA BAANYE IFE NKITA"
             }
         }
         return titles.get(language, titles["English"])
 
-    def get_fallback_farm_plan(self, crop: str, state: str, language: str) -> str:
+    def get_fallback_farm_plan(self, crop: str, state: str, language: str,
+                               soil_type="Loamy", fertilization_method="Mixed"):
         fallback_plans = {
             "English": f"""
 1. WHAT TO DO THIS WEEK
@@ -133,6 +140,12 @@ class OrchestratorAgent:
 3. FINANCING OPTIONS
 - Consider Bank of Agriculture and cooperative loans.
 - Use savings and local credit groups to support farm cashflow.
+
+4. FERTILIZATION RECOMMENDATIONS
+- Your soil type: {soil_type}
+- Your current method: {fertilization_method}
+- Apply balanced NPK fertilizer based on soil test results.
+- Improve soil with compost and organic matter regularly.
 """,
             "Yoruba": f"""
 1. KINI LATI ṢE Ọ̀SẸ̀ YÌÍ
@@ -147,6 +160,12 @@ class OrchestratorAgent:
 3. ÀWỌN ÀṢẸJỌ̀ FUN ÌSÚNÁWÓ
 - Wò ó sí Bank of Agriculture ati àwọn awin ìjọpọ̀.
 - Lo ìpamọ́ àti ìjọsọpọ̀ àgùntàn láti ṣe atilẹyin owo.
+
+4. ÀWỌN ÌMỌ̀RÀN LÓRÍ AJILE
+- Iru ile re: {soil_type}
+- Ọna ajile re: {fertilization_method}
+- Fi NPK ajile dokita si ile re.
+- Fi compost kun ile re nigbagbogbo.
 """,
             "Hausa": f"""
 1. ABINDA ZA A YI A WANNAN MAKO
@@ -161,20 +180,32 @@ class OrchestratorAgent:
 3. ZAƊI NA KUƊI
 - Duba bashi daga Bank of Agriculture da kungiyoyin hadin gwiwa.
 - Yi amfani da ajiya da kungiyar lamuni ta gari.
+
+4. SHAWARAR TAKI
+- Irin ƙasarka: {soil_type}
+- Hanyar taki: {fertilization_method}
+- Yi amfani da taki NPK daidai da gwajin ƙasa.
+- Ƙara taki na halitta akai-akai.
 """,
             "Igbo": f"""
 1. GỊNỊ KA A GA-EME N’IZU A
-- Lelee mmiri n’ala ma tinye aja ma ọ bụ compost ma ọ bụrụ na ọ dị mkpa.
+- Lelee mmiri n'ala ma tinye aja ma ọ bụ compost ma ọ bụrụ na ọ dị mkpa.
 - Nyere okra gị ọtụtụ nlekọta megide ndị nje na pests.
-- Jide n’aka na ịgba mmiri na-aga n’usoro.
+- Jide n'aka na ịgba mmiri na-aga n'usoro.
 
 2. OLEE OGE NA EBE I SI ERE
 - Tụnyere ọnụ ahịa ahịa tupu i buo okra.
-- Ree n’ahịa obodo ma ọ bụ n’etiti ahịa dị nso na {state}.
+- Ree n'ahịa obodo ma ọ bụ n'etiti ahịa dị nso na {state}.
 
 3. NZỌỤỤ ỤLỌ AHỤ
 - Lelee ụgwọ Bank of Agriculture na nkwado otu ugbo.
 - Jiri ego echekwara na otu nkwado obodo kwado ego ubi.
+
+4. NTUZIAKA BAANYE IFE NKITA
+- Ụdị ala gị: {soil_type}
+- Ụzọ ife nkita gị: {fertilization_method}
+- Jiri NPK fatịlaịza dabere na nnwale ala.
+- Tinye compost na ala gị mgbe nile.
 """
         }
         return fallback_plans.get(language, fallback_plans["English"])
@@ -184,11 +215,14 @@ class OrchestratorAgent:
     # -----------------------------
     async def generate_farm_plan(
         self, name, state, lga, crop, farm_size,
-        soil, weather, market, finance, language
+        soil, weather, market, finance, language,
+        soil_type="Loamy", fertilization_method="Mixed"
     ):
 
         language_instruction = self.get_language_instruction(language)
         section_titles = self.get_section_titles(language)
+
+        soil_rec = get_soil_recommendation(soil_type, fertilization_method, crop)
 
         system_prompt = f"""
 You are an expert agricultural advisor for Nigerian farmers.
@@ -200,11 +234,12 @@ You MUST write the entire response strictly in the requested language.
 Do NOT translate into English.
 Do NOT mix languages.
 
-Return EXACTLY 3 sections with these headings:
+Return EXACTLY 4 sections with these headings:
 
 1. {section_titles['what_to_do']}
 2. {section_titles['when_where_sell']}
 3. {section_titles['financing']}
+4. {section_titles['fertilization']}
 
 Use the exact section headings above. Do not use English headings when the requested language is not English.
 
@@ -228,6 +263,12 @@ MARKET:
 
 FINANCE:
 {finance}
+
+SOIL TYPE: {soil_type}
+FERTILIZATION METHOD: {fertilization_method}
+
+FERTILIZATION RECOMMENDATION:
+{soil_rec}
 """
 
         try:
@@ -254,12 +295,15 @@ FINANCE:
     async def generate_farm_plan_stream(
         self, name, state, lga, crop, farm_size,
         soil, weather, market, finance, language,
-        stream_callback
+        stream_callback,
+        soil_type="Loamy", fertilization_method="Mixed"
     ):
         """Generate farm plan with streaming and real-time callback."""
 
         language_instruction = self.get_language_instruction(language)
         section_titles = self.get_section_titles(language)
+
+        soil_rec = get_soil_recommendation(soil_type, fertilization_method, crop)
 
         system_prompt = f"""
 You are an expert agricultural advisor for Nigerian farmers.
@@ -271,11 +315,12 @@ You MUST write the entire response strictly in the requested language.
 Do NOT translate into English.
 Do NOT mix languages.
 
-Return EXACTLY 3 sections with these headings:
+Return EXACTLY 4 sections with these headings:
 
 1. {section_titles['what_to_do']}
 2. {section_titles['when_where_sell']}
 3. {section_titles['financing']}
+4. {section_titles['fertilization']}
 
 Use the exact section headings above. Do not use English headings when the requested language is not English.
 
@@ -299,6 +344,12 @@ MARKET:
 
 FINANCE:
 {finance}
+
+SOIL TYPE: {soil_type}
+FERTILIZATION METHOD: {fertilization_method}
+
+FERTILIZATION RECOMMENDATION:
+{soil_rec}
 """
 
         try:
@@ -335,7 +386,9 @@ FINANCE:
     # -----------------------------
     # MAIN ORCHESTRATION
     # -----------------------------
-    async def orchestrate(self, name, state, lga, crop, farm_size, language, stream_callback=None):
+    async def orchestrate(self, name, state, lga, crop, farm_size, language,
+                          stream_callback=None, soil_type="Loamy",
+                          fertilization_method="Mixed"):
 
         valid, inputs = validate_all_inputs(
             name, state, lga, crop, str(farm_size), language
@@ -354,6 +407,10 @@ FINANCE:
         crop = inputs["crop"]
         farm_size = inputs["farm_size"]
         language = inputs["language"]
+
+        if soil_type.title() not in [s.title() for s in SOIL_TYPES]:
+            soil_type = "Loamy"
+        soil_type = soil_type.title()
 
         print("Dispatching agents...")
 
@@ -379,26 +436,30 @@ FINANCE:
                 name, state, lga, crop, farm_size,
                 soil, weather, market, finance,
                 language,
-                stream_callback
+                stream_callback,
+                soil_type, fertilization_method
             )
         else:
             farm_plan = await self.generate_farm_plan(
                 name, state, lga, crop, farm_size,
                 soil, weather, market, finance,
-                language
+                language,
+                soil_type, fertilization_method
             )
         
         synthesis_t = time.time() - synth_start
 
         print("\nFarm plan ready!")
 
-        return {
+        result = {
             "success": True,
             "farmer_name": name,
             "location": f"{lga}, {state}",
             "crop": crop,
             "farm_size": farm_size,
             "language": language,
+            "soil_type": soil_type,
+            "fertilization_method": fertilization_method,
             "farm_plan": farm_plan,
             "agent_reports": {
                 "soil": soil,
@@ -415,4 +476,14 @@ FINANCE:
                 "total": f"{(soil_t + weather_t + market_t + finance_t):.1f}s"
             }
         }
+
+        # Generate .docx and .pdf files
+        try:
+            file_paths = save_farm_plan_files(result)
+            result["exported_files"] = file_paths
+            print(f"Files saved: {file_paths['docx']}, {file_paths['pdf']}")
+        except Exception:
+            print("Could not export files (python-docx or fpdf2 may not be installed).")
+
+        return result
     
