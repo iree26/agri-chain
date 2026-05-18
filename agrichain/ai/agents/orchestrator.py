@@ -95,117 +95,294 @@ class OrchestratorAgent:
         }
         return language_map.get(language, "IMPORTANT: Respond ONLY in English.")
 
-    def get_section_titles(self, language: str) -> dict:
-        titles = {
-            "English": {
-                "what_to_do": "WHAT TO DO THIS WEEK",
-                "when_where_sell": "WHEN AND WHERE TO SELL",
-                "financing": "FINANCING OPTIONS",
-                "fertilization": "FERTILIZATION RECOMMENDATIONS"
-            },
-            "Yoruba": {
-                "what_to_do": "KINI LATI ṢE Ọ̀SẸ̀ YÌÍ",
-                "when_where_sell": "NÍGBÀ ATI NÍBO LÁTI TA",
-                "financing": "ÀWỌN ÀṢẸJỌ̀ FUN ÌSÚNÁWÓ",
-                "fertilization": "ÀWỌN ÌMỌ̀RÀN LÓRÍ AJILE"
-            },
-            "Hausa": {
-                "what_to_do": "ABINDA ZA A YI A WANNAN MAKO",
-                "when_where_sell": "YA YAKE A SAYARWA",
-                "financing": "ZAƊI NA KUƊI",
-                "fertilization": "SHAWARAR TAKI"
-            },
-            "Igbo": {
-                "what_to_do": "IHE IGA EME IZUUKA A",
-                "when_where_sell": "EBE NA OGE EZI AHIA",
-                "financing": "NDỊ EKWERE INYE EGO",
-                "fertilization": "NTUZIAKA BAANYE IFE NKITA"
-            }
-        }
-        return titles.get(language, titles["English"])
+
 
     def get_fallback_farm_plan(self, crop: str, state: str, language: str,
                                soil_type="Loamy", fertilization_method="Mixed"):
         fallback_plans = {
             "English": f"""
-1. WHAT TO DO THIS WEEK
-- Check soil moisture and add compost or fertilizer if needed.
-- Monitor for pests and diseases in your {crop} field.
-- Keep irrigation steady and weed control active.
+1. FARM OBJECTIVES
+- Establish a productive and sustainable {crop} farm spanning the available land area.
+- Achieve food security and generate steady income for the farmer and family.
+- Implement modern and traditional farming techniques for optimal yield.
+- Build a resilient farming operation that can withstand climate and market fluctuations.
+- Expand operations over time and create employment opportunities in the local community.
 
-2. WHEN AND WHERE TO SELL
-- Compare prices at local markets before harvest.
-- Sell at nearby markets or collection centers in {state}.
+2. LAND AND SITE ANALYSIS
+- The farm is located in {state}, which has suitable agro-ecological conditions for {crop} cultivation.
+- Soil type is {soil_type}, which provides adequate drainage and nutrient-holding capacity.
+- Assess the land for proper drainage, slope, and water retention before planting.
+- Conduct a soil pH test to confirm whether lime or sulfur amendments are needed.
+- Evaluate water sources — rainfall patterns, nearby streams, or borehole availability.
+- Consider wind direction and sun exposure when planning field orientation.
 
-3. FINANCING OPTIONS
-- Consider Bank of Agriculture and cooperative loans.
-- Use savings and local credit groups to support farm cashflow.
+3. FARM LAYOUT AND DESIGN
+- Divide the farm into sections: main crop area, nursery beds, compost zone, and storage area.
+- Allocate 70% of land to main {crop} production, 10% to nursery, 10% to pathways and buffer zones, and 10% to storage and equipment shed.
+- Install a central irrigation system with branching channels or drip lines to each section.
+- Build access roads wide enough for farm machinery and harvest transport.
+- Position storage facilities near the main access road for easy loading and offloading.
+- Create windbreaks using fast-growing trees around the farm perimeter.
 
-4. FERTILIZATION RECOMMENDATIONS
-- Your soil type: {soil_type}
-- Your current method: {fertilization_method}
-- Apply balanced NPK fertilizer based on soil test results.
-- Improve soil with compost and organic matter regularly.
+4. PRODUCTION STRATEGY
+- Begin with land clearing, tilling, and bed preparation 2–3 weeks before planting.
+- Source high-quality, disease-resistant {crop} seeds from certified suppliers.
+- Apply pre-planting fertilizer based on soil test recommendations for {soil_type} soil.
+- Plant at the correct spacing and depth for {crop} to ensure optimal growth.
+- Implement a regular irrigation schedule: 2–3 times per week depending on rainfall.
+- Monitor for common pests and diseases weekly; apply organic or chemical control as needed.
+- Weed control: manual weeding every 2 weeks or use of mulch to suppress weed growth.
+- Harvest at the right maturity stage to maximize quality and market price.
+- Post-harvest handling: sort, clean, and store in a cool, dry place.
+
+5. EQUIPMENT AND RESOURCES NEEDED
+- Land preparation: tractor or hoe, plough, harrow, ridger.
+- Planting: hand planters, measuring tape, markers, watering cans.
+- Irrigation: pump, pipes, sprinklers or drip lines, water storage tank.
+- Crop maintenance: knapsack sprayer, pruning shears, machete, hoe, rake.
+- Harvesting: harvesting crates, baskets, knives, weighing scale.
+- Storage: ventilated storage room, gunny bags, pallets.
+- Inputs: certified seeds, NPK fertilizer, organic compost, pesticides, herbicides.
+- Protective gear: boots, gloves, face masks, overalls.
+
+6. LABOUR PLAN
+- Farm manager/supervisor: 1 person (full-time) — oversees all farm operations.
+- Permanent farm workers: 2–3 persons (full-time) — planting, irrigation, maintenance.
+- Seasonal workers: 4–6 persons (part-time during planting and harvest seasons).
+- Roles: land preparation crew, planting team, irrigation operators, pest control team, harvesters.
+- Provide basic training on crop management, equipment use, and safety procedures.
+- Labour cost estimate: include wages, meals, and accommodation if applicable.
+
+7. FINANCIAL PLAN
+- Startup costs: land preparation, equipment purchase, seeds, fertilizers, irrigation setup.
+- Operating costs: labour, water, electricity, fuel, pesticides, transportation, maintenance.
+- Contingency fund: set aside 10–15% of total budget for emergencies.
+- Revenue projection: estimate yield per hectare × expected market price per unit.
+- Break-even analysis: calculate the point at which total revenue covers total costs.
+- Funding sources: personal savings, Bank of Agriculture loans, cooperative society loans, government agricultural grants.
+- Maintain a simple ledger to track all income and expenses.
+
+8. MARKETING PLAN
+- Target markets: local open markets, urban wholesalers, supermarkets, food processors.
+- Pricing strategy: monitor market prices weekly and price competitively.
+- Distribution: transport harvested {crop} directly to market or use collection centers.
+- Storage: use proper storage to avoid post-harvest losses and sell when prices are favourable.
+- Build relationships with buyers: offer consistent quality and reliable supply.
+- Consider value addition: cleaning, packaging, or processing to increase income.
+- Record sales data to identify best-performing markets and seasons.
 """,
             "Yoruba": f"""
-1. KINI LATI ṢE Ọ̀SẸ̀ YÌÍ
-- Ṣayẹwo ìmúnira ilẹ̀, fi compost tàbí ìràwọ̀ kun bí ó ṣe yẹ.
-- Ṣe ìmúlòlùfẹ́ fun àwọn kokoro àti àìlera lori okra rẹ.
-- Mú irigeson pọ̀ to ati pa koríko mọ́lẹ̀.
+1. AWỌN IBI-ÀFẸMỌ́ Ọ̀GBIN
+- Ṣe ìdásílẹ̀ oko {crop} tó ṣe é gbéṣẹ́ tó sì ń so èso dáradára.
+- Rí i pé oúnjẹ wà fún ìdílé àti pé owó ń wọlé dáradára.
+- Lo àwọn ìlànà òde-òní àti ìbílẹ̀ láti gba èso tó pọ̀.
+- Kó oko le kọjà àwọn ìyipada ojú ọjọ́ àti ọjà.
+- Gbìyànjú láti mú oko gbòòrò kí ó sì dá àwọn iṣẹ́ sílẹ̀ fún àgbègbè.
 
-2. NÍGBÀ ATI NÍBO LÁTI TA
-- Ṣe ìfọwọ́ba àwọn owó ni ọja agbegbe ṣáájú ikore.
-- Ta ni ọja tó sún mọ́lẹ̀ sí ọ̀pọ̀lọpọ̀ ibi ni {state}.
+2. ÌTÚPALẸ̀ ILẸ̀ ÀTI IBÌ
+- Oko wà ní {state}, ibi tí ojú ọjọ́ àti ilẹ̀ rẹ̀ bá {crop} mu.
+- Iru ilẹ̀ ni {soil_type}, tó ń da omi nù dáradára tó sì ń gba afẹ́fẹ́.
+- Ṣàyẹ̀wò ilẹ̀ fún ìmú omi, ìtẹ́ ilẹ̀ àti agbára idaduro omi.
+- Wọn ipele pH ilẹ̀ láti fi mọ̀ bóyá kílààtì tàbí sulfur yẹ.
+- Ṣàyẹ̀wò orísun omi — iye òjò, àwọn odò, tàbí kànga.
+- Kíyèsi ìtọ́nà afẹ́fẹ́ àti ìmọ́lẹ̀ oòrùn nígbà tí o ń gbòòrò oko.
 
-3. ÀWỌN ÀṢẸJỌ̀ FUN ÌSÚNÁWÓ
-- Wò ó sí Bank of Agriculture ati àwọn awin ìjọpọ̀.
-- Lo ìpamọ́ àti ìjọsọpọ̀ àgùntàn láti ṣe atilẹyin owo.
+3. ÌTÒ ÀTI ÌGBÉKALẸ̀ OKO
+- Pín oko sí àwọn apá: ibi gbín, ibi itọ́jú, ibi compost, àti ibi ìpamọ́.
+- Fi 70% ilẹ̀ fún gbín {crop}, 10% fún ibi itọ́jú, 10% fún ọ̀nà, 10% fún ibi ìpamọ́.
+- Fi eto irigeson sílẹ̀ pẹ̀lú àwọn ọ̀nà omi tó lọ sí gbogbo apá oko.
+- Kọ́ àwọn ọ̀nà tó gbóòrì tó fún àwọn ẹ̀rọ àti kẹ̀kẹ́.
+- Gbé ibi ìpamọ́ sí ibi tó rọrùn fún kíkó ẹrù sí ọkọ̀.
+- Gbin àwọn igi tó ń da afẹ́fẹ́ ní àyíká oko.
 
-4. ÀWỌN ÌMỌ̀RÀN LÓRÍ AJILE
-- Iru ile re: {soil_type}
-- Ọna ajile re: {fertilization_method}
-- Fi NPK ajile dokita si ile re.
-- Fi compost kun ile re nigbagbogbo.
+4. ÌGBÉRÒ ÌṢÈJÁDE
+- Bẹ̀rẹ̀ pẹ̀lú ìmọ́ ilẹ̀, ìtu ilẹ̀, àti ìṣe ibi gbín 2–3 ọ̀sẹ̀ ṣáájú gbín.
+- Ra irúgbin {crop} tó dáradára, tó lè kojú àrùn.
+- Fi ajile ṣáájú gbín gẹ́gẹ́ bí ìmọ̀ràn ilẹ̀ rẹ̀ fún {soil_type}.
+- Gbin ni ààyè àti ìjìnlẹ̀ tí ó tọ́ fún {crop}.
+- Mú eto irigeson dé: 2–3 ìgbà lọ́sẹ̀ gẹ́gẹ́ bí òjò.
+- Ṣàyẹ̀wò àwọn kòkòrò àti àrùn lọ́sẹ̀-ọ̀sẹ̀; fi ìràwọ̀ tàbí ògùn tí ó tọ́.
+- Pa èpò: máa pa èpò lọ́wọ́ lọ́sẹ̀-ọ̀sẹ̀ tàbí lo mulch.
+- Kórè ní ìgbà tí èso bá pọ́n dáradára.
+- Lẹ́yìn ìkórè: tọ́jọ́, wẹ, kó si ibi tó tutù.
+
+5. ÀWỌN Ẹ̀RỌ ÀTI OHUN-ÈLÒ TÍ A NILÒ
+- Ìmúra ilẹ̀: trátòr tàbí ọ̀kà, plough, harrow, ridger.
+- Gbín: àwọn ẹ̀rọ gbín, tépù, àmì, ìgò omi.
+- Ìrìgèsón: póńpù, píìpù, sprinkles tàbí drip lines, ìgò omi nla.
+- Ìtọ́jú: knapsack sprayer, pruning shears, àdá, ọ̀kà, rake.
+- Ìkórè: agbọn, agbọ̀n, ọ̀bẹ, òṣùwọ̀n.
+- Ìpamọ́: yàrá ìpamọ́, àpò, pallets.
+- Ohun èlò: irúgbin, NPK ajile, compost, ògùn kòkòrò, ògùn èpò.
+- Àwọ̀tílẹ̀: bàtà, ìbọ̀wọ́, ìbòjú, aṣọ.
+
+6. ÈTÒ ÒSÌṢẸ́
+- Olùṣọ́ oko: 1 (kún-akókò) — ń bójú tó gbogbo iṣẹ́ oko.
+- Àwọn òṣìṣẹ́ aláìṣiṣẹ́pọ̀: 2–3 (kún-akókò) — gbín, irigeson, ìtọ́jú.
+- Àwọn òṣìṣẹ́ ìgbà: 4–6 (apá-akókò nígbà gbín àti ìkórè).
+- Àwọn iṣẹ́: ìmọ́ ilẹ̀, ẹgbẹ́ gbín, ẹgbẹ́ irigeson, ẹgbẹ́ ìtọ́jú, ẹgbẹ́ ìkórè.
+- Pese ìdánilẹ́kọ̀ọ́ lórí ìtọ́jú {crop}, lílo ẹ̀rọ, àti ààbò.
+- Iye owó òṣìṣẹ́: owó iṣẹ́, oúnjẹ, ibùgbé.
+
+7. ÈTÒ ÌSÚNÁWÓ
+- Iye owó ìbẹ̀rẹ̀: ìmúra ilẹ̀, rírà ẹ̀rọ, irúgbin, ajile, irigeson.
+- Iye owó iṣiṣẹ́: òṣìṣẹ́, omi, iná, epo, ògùn, gbigbé, ìtọ́jú.
+- Ifowó pàmọ́: fi 10–15% àyà gbà fún ìjábá.
+- Àsọtẹ́lẹ̀ owó tí ń wọlé: iye èso fun hektà × iye owó tí a ń tà.
+- Ìtúpalẹ̀ break-even: ibi tí owó tí ń wọlé bá tó owó tí a ná.
+- Orísun owó: ifowópamọ́, Bank of Agriculture, awin ẹgbẹ́, ìrànlọ́wọ́ ìjọba.
+- Pa ìwé-àkọọ́lẹ̀ owó mọ́.
+
+8. ÈTÒ ÒWÒ
+- Ọjà: ọjà gbogbo ènìyàn, àwọn olùrà túndùn, ilé-iṣọ́, ilé-ìjẹun.
+- Ìgbérò owó: ṣàyẹ̀wò owó ọjà lọ́sẹ̀-ọ̀sẹ̀ kí o sì fi owó tó bójú mu.
+- Gbigbékó: gbé {crop} lọ sí ọjà tàbí ibi ìkójọpọ̀.
+- Ìpamọ́: lo ìpamọ́ tí ó tọ́ láti má bàa pàdánù.
+- Kó àjọṣe pẹ̀lú olùrà: pese didára àti ìgbà gbà-ìgbà.
+- Ṣiṣẹ́ afikun: wẹ, bá àpò, ṣe èlò láti gba owó púpọ̀.
+- Kọ àkọọ́lẹ̀ ojà láti mọ ibi tí owó ń wọlé jù.
 """,
             "Hausa": f"""
-1. ABINDA ZA A YI A WANNAN MAKO
-- Duba danshin ƙasa kuma ƙara taki ko compost idan ya cancanta.
-- Kula da kwari da cututtuka a gonar {crop}.
-- Ci gaba da shayar da iri da tsaftace ciyawa.
+1. MANUFOFIN GONA
+- Kafa gona {crop} mai albarka da dorewa.
+- Samar da abinci da kuma samun kuɗi mai kyau ga manomi da iyalinsa.
+- Yi amfani da fasaha na zamani da na gargajiya don samun amfanin gona mai yawa.
+- Gina gona mai ƙarfi don jure wa sauyin yanayi da kasuwa.
+- Fadada ayyukan a tsawon lokaci da samar da ayyukan yi ga al'umma.
 
-2. YA YAKE A SAYARWA
-- Kwatanta farashin kasuwa kafin girbi.
-- Sayar da kayanka a kasuwannin cikin {state} ko wuraren tattarawa.
+2. NAZARIN KASA DA WURI
+- Gona tana cikin {state}, inda yanayi ya dace don noman {crop}.
+- Irin ƙasa: {soil_type}, wanda ke da magudanar ruwa mai kyau.
+- Bincika ƙasa don magudanar ruwa, tudu, da kuma riƙon ruwa kafin shuka.
+- Gwada pH na ƙasa don sanin ko ana buƙatar lemun ƙasa ko sulfur.
+- Bincika tushen ruwa — yanayin ruwan sama, kogi, ko rijiyar burtsatse.
+- Yi la'akari da alkiblar iska da hasken rana yayin shimfida gona.
 
-3. ZAƊI NA KUƊI
-- Duba bashi daga Bank of Agriculture da kungiyoyin hadin gwiwa.
-- Yi amfani da ajiya da kungiyar lamuni ta gari.
+3. TSARI DA SHIRI GONA
+- Raba gona zuwa sassa: babban yankin shuka, wurin dasa, wurin taki, da wurin ajiya.
+- Sanya 70% na ƙasa don noman {crop}, 10% na wurin dasa, 10% na hanyoyi, 10% na ajiya.
+- Sanya tsarin ban ruwa mai rassa zuwa kowane sashi.
+- Gina hanyoyi masu faɗi don injuna da jigilar girbi.
+- Sanya wurin ajiya kusa da babbar hanya don sauƙin ɗaukar kaya.
+- Gina shingen iska ta amfani da bishiyoyi masu saurin girma.
 
-4. SHAWARAR TAKI
-- Irin ƙasarka: {soil_type}
-- Hanyar taki: {fertilization_method}
-- Yi amfani da taki NPK daidai da gwajin ƙasa.
-- Ƙara taki na halitta akai-akai.
+4. DABARUN SAMARWA
+- Fara da share ƙasa, noma, da shirya gadaje 2–3 makonni kafin shuka.
+- Samo iri {crop} ingantattun, masu juriya daga attajirai.
+- Sanya taki kafin shuka bisa ga gwajin ƙasa don {soil_type}.
+- Shuka da daidai tazara da zurfin da ya dace don {crop}.
+- Sanya tsarin ban ruwa na yau da kullun: sau 2–3 a mako.
+- Duba kwari da cututtuka kowane mako; yi amfani da magani.
+- Cire ciyawa duk sati biyu ko yi amfani da mulch.
+- Girbe a daidai lokacin balaga don inganci da farashi.
+- Bayan girbi: tsara, tsaftace, adana a wuri mai sanyi.
+
+5. KAYAN AIKI DA ALBOBUN DA AKE BUKATA
+- Shirye-shiryen ƙasa: tarakta ko fartanya, garma, harrow, ridger.
+- Shuka: injunan shuka, tef, alamomi, feshin ruwa.
+- Ban ruwa: famfo, bututu, sprinklers ko drip lines, tankin ruwa.
+- Kula da shuka: knapsack sprayer, pruning shears, adda, fartanya, rake.
+- Girbi: kwanduna, kwanduna, wuƙaƙe, ma'auni.
+- Ajiya: ɗakin ajiya, buhunan gunny, pallets.
+- Albo: iri, NPK taki, taki na halitta, maganin kwari, maganin ciyawa.
+- Kayan kariya: takalmi, safofin hannu, abin rufe fuska, tufafi.
+
+6. TSARIN MA'AIKATA
+- Mai kula da gona: mutum 1 (cikakken lokaci) — kula da dukkan ayyuka.
+- Ma'aikatan dindindin: mutum 2–3 (cikakken lokaci) — shuka, ban ruwa, kula.
+- Ma'aikatan yanayi: mutum 4–6 (lokacin shuka da girbi).
+- Ayyuka: share ƙasa, shuka, ban ruwa, maganin kwari, girbi.
+- Ba da horo kan kula da {crop}, amfani da kayan aiki, da aminci.
+- Kudin ma'aikata: albashi, abinci, masauki.
+
+7. TSARIN KUɗI
+- Kudin farawa: share ƙasa, siyan kayan aiki, iri, taki, ban ruwa.
+- Kudin gudanarwa: ma'aikata, ruwa, wutar lantarki, mai, magunguna, sufuri, kulawa.
+- Asusun gaggawa: ajiye 10-15% na kasafin kuɗi don gaggawa.
+- Hasashen kuɗin shiga: yawan amfanin gona a kowace hekta × farashin kasuwa.
+- Binciken break-even: lokacin da kuɗin shiga ya rufe kuɗin da aka kashe.
+- Tushen kuɗi: ajiyar kai, Bank of Agriculture, lamunin hadin gwiwa, tallafin gwamnati.
+- Rike lissafin kuɗi na yau da kullun.
+
+8. TSARIN KASUWANCI
+- Kasuwar da aka yi niyya: kasuwannin gida, manyan dillalai, manyan kantuna, masu sarrafa abinci.
+- Dabarun farashi: duba farashin kasuwa kowane mako.
+- Rarraba: kai {crop} kai tsaye zuwa kasuwa ko wuraren tattarawa.
+- Ajiya: yi amfani da ajiya mai kyau don guje wa hasara.
+- Gina dangantaka da masu saye: samar da inganci akai-akai.
+- Ƙara darajar: tsaftacewa, tattarawa, ko sarrafawa don ƙarin kuɗi.
+- Rubuta bayanan tallace-tallace don gano mafi kyawun kasuwa.
 """,
             "Igbo": f"""
-1. GỊNỊ KA A GA-EME N’IZU A
-- Lelee mmiri n'ala ma tinye aja ma ọ bụ compost ma ọ bụrụ na ọ dị mkpa.
-- Nyere okra gị ọtụtụ nlekọta megide ndị nje na pests.
-- Jide n'aka na ịgba mmiri na-aga n'usoro.
+1. IHE EGWU NZUỤTA UBỊ
+- Guzobere ubi {crop} na-adịgide adịgide nke na-amị mkpụrụ nke ọma.
+- Nweta nchekwa nri na ego na-abata nke ọma nye onye ọrụ ugbo na ezinụlọ ya.
+- Jikọta usoro ugbo ọgbara ọhụrụ na nke ọdịnala iji nweta mkpụrụ kachasị mma.
+- Wulite ọrụ ugbo siri ike nke nwere ike iguzogide mgbanwe ihu igwe na ahịa.
+- Gbasaa ọrụ ka oge na-aga ma mepụta ohere ọrụ n'ime obodo.
 
-2. OLEE OGE NA EBE I SI ERE
-- Tụnyere ọnụ ahịa ahịa tupu i buo okra.
-- Ree n'ahịa obodo ma ọ bụ n'etiti ahịa dị nso na {state}.
+2. NYOCHA ALA NA EBE
+- Ubi dị na {state}, ebe ọnọdụ ihu igwe kwesịrị ekwesị maka ịkọ {crop}.
+- Ụdị ala bụ {soil_type}, nke na-enye ezigbo mgbapụta mmiri na njide nri.
+- Nyochaa ala maka mgbapụta mmiri, mkpọda, na njide mmiri tupu ịkụ ihe.
+- Nwalee pH ala iji kwado ma ọ bụrụ na achọrọ lime ma ọ bụ sulfur.
+- Tụlee isi mmiri — usoro mmiri ozuzo, iyi, ma ọ bụ olulu mmiri dị.
+- Tụlee ntụzịaka ifufe na ìhè anyanwụ mgbe ị na-ahazi ubi.
 
-3. NZỌỤỤ ỤLỌ AHỤ
-- Lelee ụgwọ Bank of Agriculture na nkwado otu ugbo.
-- Jiri ego echekwara na otu nkwado obodo kwado ego ubi.
+3. NHỌZI NA IHE E SI KWỌỌ UBÌ
+- Kewaa ubi na ngalaba: ebe ịkụ ihe, ebe ịzụlite, ebe compost, na ebe nchekwa.
+- Kenye 70% ala maka ịkọ {crop}, 10% maka ịzụlite, 10% maka ụzọ, 10% maka nchekwa.
+- Wụnye usoro ịgba mmiri nke nwere alaka na-eru na ngalaba ọ bụla.
+- Wuo ụzọ sara mbara iji kwado igwe ugbo na ibugharị ihe ubi.
+- Doo ebe nchekwa n'akụkụ ụzọ mbata maka ịkwanye ngwa ngwa.
+- Mepụta ihe mgbochi ifufe site na iji osisi na-eto ngwa ngwa gburugburu ubi.
 
-4. NTUZIAKA BAANYE IFE NKITA
-- Ụdị ala gị: {soil_type}
-- Ụzọ ife nkita gị: {fertilization_method}
-- Jiri NPK fatịlaịza dabere na nnwale ala.
-- Tinye compost na ala gị mgbe nile.
+4. USORO MMEPỤTA
+- Malite na ikpochapụ ala, ịkọ ala, na ịkwadebe ihe ndina 2-3 izu tupu ịkụ ihe.
+- Nweta mkpụrụ {crop} dị mma, na-eguzogide ọrịa site n'aka ndị ahịa ndị a pụrụ ịtụkwasị obi.
+- Tinye fatịlaịza tupu ịkụ ihe dabere na nnwale ala maka {soil_type}.
+- Kụọ n'ebe dị anya na omimi ziri ezi maka {crop}.
+- Mee usoro ịgba mmiri oge niile: ugboro 2-3 kwa izu dabere na mmiri ozuzo.
+- Nyochaa maka pests na ọrịa kwa izu; tinye ọgwụ organic ma ọ bụ chemical dịka achọrọ.
+- Igbo ahịhịa: jiri aka wepụ ahịhịa kwa izu abụọ ma ọ bụ jiri mulch.
+- Gbute n'ogo ntozu kwesịrị ekwesị iji bulie ogo na ọnụahịa.
+- Njikwa mgbe owuwe ihe ubi gasịrị: dozie, hichaa, chekwaa na ebe jụrụ oyi.
+
+5. NGWA ỌRỤ NA AKỤ NGWA ACHỌRỌ
+- Nkwadebe ala: traktọ ma ọ bụ shọvelu, plough, harrow, ridger.
+- Ịkụ ihe: ihe ịkụ ihe, teepu, ihe nrịbama, iko mmiri.
+- Ịgba mmiri: pọmpụ, paịpụ, sprinklers ma ọ bụ eriri ntanye, tankị mmiri.
+- Nlekọta ihe ubi: knapsack sprayer, pruning shears, mma, shọvelu, rake.
+- Owuwe ihe ubi: nkata, nkata, mma, ihe ọ̀tụ̀tụ̀.
+- Nchekwa: ụlọ nchekwa, akpa gunny, pallets.
+- Ihe ntinye: mkpụrụ ndị gbasara, NPK fatịlaịza, compost, ọgwụ pests, ọgwụ ahịhịa.
+- Ngwá ọrụ nchebe: akpụkpọ ụkwụ, uwe aka, ihe mkpuchi ihu, uwe.
+
+6. ATỤMATỤ NDỌ ỌRỤ
+- Onye nlekọta ubi: mmadụ 1 (oge niile) — na-elekọta ọrụ ubi niile.
+- Ndị ọrụ oge niile: mmadụ 2–3 (oge niile) — ịkụ ihe, ịgba mmiri, nlekọta.
+- Ndị ọrụ oge: mmadụ 4–6 (oge ịkụ ihe na owuwe ihe ubi).
+- Ọrụ: ndị na-akọ ala, ndị ịkụ ihe, ndị ịgba mmiri, ndị na-ahụ maka pests, ndị owuwe ihe ubi.
+- Nye ọzụzụ banyere nlekọta {crop}, ojiji ngwa ọrụ, na nchekwa.
+- Atụmatụ ụgwọ ọrụ: ụgwọ ọrụ, nri, ebe obibi.
+
+7. ATỤMATỤ EGO
+- Ụgwọ mmalite: nkwadebe ala, ịzụta ngwa ọrụ, mkpụrụ, fatịlaịza, ịgba mmiri.
+- Ụgwọ arụmọrụ: ndị ọrụ, mmiri, ọkụ, mmanụ, ọgwụ pestis, njem, mmezi.
+- Ego nchekwa: debe 10–15% nke mmefu ego niile maka ihe mberede.
+- Amụma ego nbata: atụmatụ mkpụrụ kwa hekta × ọnụahịa ahịa.
+- Nyocha break-even: mgbe ego nbata ruru mkpokọta mmefu.
+- Isi ego: ego nchekwa onwe, Bank of Agriculture, mbinye ego ọgbakọ, enyemaka gọọmentị.
+- Debe akwụkwọ ndekọ ego.
+
+8. ATỤMATỤ AHỊA
+- Ahịa ezubere: ahịa obodo, ndị na-ere ahịa n'obodo mepere emepe, nnukwu ụlọ ahịa, ndị na-ahazi nri.
+- Usoro ọnụahịa: lelee ọnụahịa ahịa kwa izu wee tọọ ọnụahịa asọmpi.
+- Nkesa: buru {crop} gaa ahịa ma ọ bụ ebe nchịkọta.
+- Nchekwa: jiri ebe nchekwa dị mma iji zere ọnwụ.
+- Wulite mmekọrịta na ndị na-azụ ahịa: nye ogo na-agbanwe agbanwe.
+- Tụlee mgbakwunye uru: ihicha, nkwakọba, ma ọ bụ nhazi iji nweta ego ka ukwuu.
+- Dee data ahịa iji chọpụta ahịa kachasị mma.
 """
         }
         return fallback_plans.get(language, fallback_plans["English"])
@@ -220,7 +397,6 @@ class OrchestratorAgent:
     ):
 
         language_instruction = self.get_language_instruction(language)
-        section_titles = self.get_section_titles(language)
 
         soil_rec = get_soil_recommendation(soil_type, fertilization_method, crop)
 
@@ -233,17 +409,22 @@ CRITICAL RULE:
 You MUST write the entire response strictly in the requested language.
 Do NOT translate into English.
 Do NOT mix languages.
+All section headings must be in the requested language.
 
-Return EXACTLY 4 sections with these headings:
+Generate a comprehensive, detailed, and elaborate farm plan. The plan must NOT be short or surface-level. It must read like a professional, well-developed farm plan with deep, actionable insights.
 
-1. {section_titles['what_to_do']}
-2. {section_titles['when_where_sell']}
-3. {section_titles['financing']}
-4. {section_titles['fertilization']}
+Include ALL of the following sections with clear headings translated into the requested language:
 
-Use the exact section headings above. Do not use English headings when the requested language is not English.
+1. FARM OBJECTIVES — The vision, mission, and specific goals for this farm (short-term and long-term).
+2. LAND AND SITE ANALYSIS — Detailed assessment of the land, soil characteristics, climate, water availability, and location advantages or challenges.
+3. FARM LAYOUT AND DESIGN — How the farm should be organized: crop area divisions, irrigation layout, access roads, storage, and infrastructure placement.
+4. PRODUCTION STRATEGY — Comprehensive step-by-step production plan covering land preparation, planting, crop management, pest and disease control, irrigation schedule, and harvesting.
+5. EQUIPMENT AND RESOURCES NEEDED — Complete list of farming equipment, tools, machinery, inputs (seeds, fertilizers, pesticides), and other resources required.
+6. LABOUR PLAN — Staffing requirements, roles and responsibilities, seasonal labour needs, and labour management strategy.
+7. FINANCIAL PLAN — Detailed budget breakdown (startup costs, operating costs, contingency), revenue projections, break-even analysis, and funding sources.
+8. MARKETING PLAN — Target markets, pricing strategy, distribution channels, storage and transportation, customer identification, and sales timeline.
 
-Keep it practical, short, and farmer-friendly.
+Each section must be thorough, well-developed, and provide specific, actionable advice tailored to the farmer's crop, location, and farm size. Write multiple paragraphs per section with rich detail. Do not skip any section.
 """
 
         user_prompt = f"""
@@ -280,14 +461,14 @@ FERTILIZATION RECOMMENDATION:
                     {"role": "user", "content": user_prompt}
                 ],
                 temperature=0.6,
-                max_tokens=1200
+                max_tokens=4000
             )
 
             return response.choices[0].message.content.strip()
 
         except Exception as e:
             logger.error(f"OpenAI error: {e}")
-            return self.get_fallback_farm_plan(crop, state, language)
+            return self.get_fallback_farm_plan(crop, state, language, soil_type, fertilization_method)
 
     # -----------------------------
     # STREAMING SYNTHESIS LAYER (NEW)
@@ -301,7 +482,6 @@ FERTILIZATION RECOMMENDATION:
         """Generate farm plan with streaming and real-time callback."""
 
         language_instruction = self.get_language_instruction(language)
-        section_titles = self.get_section_titles(language)
 
         soil_rec = get_soil_recommendation(soil_type, fertilization_method, crop)
 
@@ -314,17 +494,22 @@ CRITICAL RULE:
 You MUST write the entire response strictly in the requested language.
 Do NOT translate into English.
 Do NOT mix languages.
+All section headings must be in the requested language.
 
-Return EXACTLY 4 sections with these headings:
+Generate a comprehensive, detailed, and elaborate farm plan. The plan must NOT be short or surface-level. It must read like a professional, well-developed farm plan with deep, actionable insights.
 
-1. {section_titles['what_to_do']}
-2. {section_titles['when_where_sell']}
-3. {section_titles['financing']}
-4. {section_titles['fertilization']}
+Include ALL of the following sections with clear headings translated into the requested language:
 
-Use the exact section headings above. Do not use English headings when the requested language is not English.
+1. FARM OBJECTIVES — The vision, mission, and specific goals for this farm (short-term and long-term).
+2. LAND AND SITE ANALYSIS — Detailed assessment of the land, soil characteristics, climate, water availability, and location advantages or challenges.
+3. FARM LAYOUT AND DESIGN — How the farm should be organized: crop area divisions, irrigation layout, access roads, storage, and infrastructure placement.
+4. PRODUCTION STRATEGY — Comprehensive step-by-step production plan covering land preparation, planting, crop management, pest and disease control, irrigation schedule, and harvesting.
+5. EQUIPMENT AND RESOURCES NEEDED — Complete list of farming equipment, tools, machinery, inputs (seeds, fertilizers, pesticides), and other resources required.
+6. LABOUR PLAN — Staffing requirements, roles and responsibilities, seasonal labour needs, and labour management strategy.
+7. FINANCIAL PLAN — Detailed budget breakdown (startup costs, operating costs, contingency), revenue projections, break-even analysis, and funding sources.
+8. MARKETING PLAN — Target markets, pricing strategy, distribution channels, storage and transportation, customer identification, and sales timeline.
 
-Keep it practical, short, and farmer-friendly.
+Each section must be thorough, well-developed, and provide specific, actionable advice tailored to the farmer's crop, location, and farm size. Write multiple paragraphs per section with rich detail. Do not skip any section.
 """
 
         user_prompt = f"""
@@ -361,7 +546,7 @@ FERTILIZATION RECOMMENDATION:
                     {"role": "user", "content": user_prompt}
                 ],
                 temperature=0.6,
-                max_tokens=1200,
+                max_tokens=4000,
                 stream=True
             )
 
@@ -378,7 +563,7 @@ FERTILIZATION RECOMMENDATION:
 
         except Exception as e:
             logger.error(f"OpenAI streaming error: {e}")
-            fallback = self.get_fallback_farm_plan(crop, state, language)
+            fallback = self.get_fallback_farm_plan(crop, state, language, soil_type, fertilization_method)
             if stream_callback:
                 stream_callback(fallback)
             return fallback
@@ -466,14 +651,6 @@ FERTILIZATION RECOMMENDATION:
                 "weather": weather,
                 "market": market,
                 "finance": finance
-            },
-            "execution_times": {
-                "soil": f"{soil_t:.1f}s",
-                "weather": f"{weather_t:.1f}s",
-                "market": f"{market_t:.1f}s",
-                "finance": f"{finance_t:.1f}s",
-                "synthesis": f"{synthesis_t:.1f}s",
-                "total": f"{(soil_t + weather_t + market_t + finance_t):.1f}s"
             }
         }
 

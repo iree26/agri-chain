@@ -39,10 +39,9 @@ def generate_docx(result: dict, output_path: str) -> str:
         line = line.strip()
         if not line:
             continue
-        if line.startswith("1.") or line.startswith("2.") or line.startswith("3.") or (
-            "WHAT TO DO" in line.upper() or "WHEN AND WHERE" in line.upper()
-            or "FINANCING" in line.upper() or "FERTILIZATION" in line.upper()
-        ):
+        if (line and line[0].isdigit() and '.' in line[:3]) or any(kw in line.upper() for kw in
+            ["FARM OBJECTIVES", "LAND AND SITE", "FARM LAYOUT", "PRODUCTION STRATEGY",
+             "EQUIPMENT", "LABOUR", "FINANCIAL", "MARKETING"]):
             doc.add_heading(line, level=2)
         else:
             p = doc.add_paragraph(line)
@@ -53,14 +52,6 @@ def generate_docx(result: dict, output_path: str) -> str:
         doc.add_heading(agent_name.title(), level=2)
         for line in report_text.strip().split("\n"):
             doc.add_paragraph(line.strip())
-
-    execution_times = result.get("execution_times", {})
-    doc.add_heading("Execution Times", level=1)
-    times_table = doc.add_table(rows=len(execution_times), cols=2)
-    times_table.style = "Light Shading Accent 1"
-    for i, (key, val) in enumerate(execution_times.items()):
-        times_table.cell(i, 0).text = key.title()
-        times_table.cell(i, 1).text = str(val)
 
     doc.save(output_path)
     return output_path
@@ -100,9 +91,9 @@ def generate_pdf(result: dict, output_path: str) -> str:
         line = line.strip()
         if not line:
             continue
-        if (line.startswith("1.") or line.startswith("2.") or line.startswith("3.")
-                or "WHAT TO DO" in line.upper() or "WHEN AND WHERE" in line.upper()
-                or "FINANCING" in line.upper() or "FERTILIZATION" in line.upper()):
+        if (line and line[0].isdigit() and '.' in line[:3]) or any(kw in line.upper() for kw in
+            ["FARM OBJECTIVES", "LAND AND SITE", "FARM LAYOUT", "PRODUCTION STRATEGY",
+             "EQUIPMENT", "LABOUR", "FINANCIAL", "MARKETING"]):
             pdf.set_font("Helvetica", "B", 10)
             pdf.multi_cell(0, 6, line)
             pdf.set_font("Helvetica", "", 10)
@@ -120,14 +111,6 @@ def generate_pdf(result: dict, output_path: str) -> str:
         pdf.set_font("Helvetica", "", 10)
         for line in report_text.strip().split("\n"):
             pdf.multi_cell(0, 5, line.strip())
-
-    execution_times = result.get("execution_times", {})
-    pdf.ln(3)
-    pdf.set_font("Helvetica", "B", 12)
-    pdf.cell(0, 8, "Execution Times", new_x="LMARGIN", new_y="NEXT")
-    pdf.set_font("Helvetica", "", 10)
-    for key, val in execution_times.items():
-        pdf.cell(0, 6, f"{key.title()}: {val}", new_x="LMARGIN", new_y="NEXT")
 
     pdf.output(output_path)
     return output_path
