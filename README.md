@@ -4,7 +4,7 @@ A multi agent AI system that helps Nigerian smallholder farmers decide what to p
 
 **Submission:** DSN x BCT LLM Agent Challenge 3.0, Task B (Recommendation)
 
-- **Live deployment:** https://gilded-salmiakki-9cfe3e.netlify.app
+- **Live deployment:** https://agri-chain.netlify.app/
 - **Backend API:** https://agri-chain-production.up.railway.app
 
 ---
@@ -233,7 +233,7 @@ Returns `{ "status": "healthy" }` if the server is reachable.
 
 ## Reproducing the Demo
 
-1. Open the live deployment at https://gilded-salmiakki-9cfe3e.netlify.app
+1. Open the live deployment at https://agri-chain.netlify.app/
 2. Either fill out the 5 step form, or click one of the three sample farmer profiles (Chukwuemeka, Adaeze, or Bashir) for instant results
 3. Wait roughly 30 seconds for the agents to complete and the LLM to synthesize the plan
 4. Click any agent card to see the underlying data and confidence level
