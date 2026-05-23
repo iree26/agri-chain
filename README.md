@@ -19,7 +19,7 @@ AgriChain bridges that gap. It takes a few simple inputs from the farmer and rep
 
 ## How It Works
 
-The system uses an orchestrator with five specialized agents working in parallel. Each agent owns one domain and returns structured output with a confidence level.
+The system uses an orchestrator with five specialized agents working in parallel. Each agent owns one domain, calls live external data sources, and returns structured output with a confidence level.
 
 ```
 Farmer Input (web form or WhatsApp)
@@ -37,7 +37,7 @@ Farmer Input (web form or WhatsApp)
     └──────────┴──────────┴──────────┴──────────┘
                               ↓
                    ┌─────────────────────┐
-                   │  Claude Synthesis   │
+                   │  LLM Synthesis      │
                    │  (one clean plan)   │
                    └──────────┬──────────┘
                               ↓
@@ -46,17 +46,23 @@ Farmer Input (web form or WhatsApp)
           Web Result                   WhatsApp Delivery
 ```
 
-### The Five Agents
+### The Five Agents and Their Data Sources
 
-| Agent | What It Does | Data Sources |
+| Agent | What It Does | External APIs / Data |
 |---|---|---|
-| Soil and Crop | Determines soil type, pH, nutrient profile, and crop suitability score | Soil databases, crop matching logic |
-| Weather | Produces a 7 day forecast, flags flood and drought risk, recommends planting day | Open Meteo API |
-| Market Price | Returns current crop price, best regional markets, and price trends | Commodity exchange data, market scrapers |
-| Finance | Matches the farmer with eligible loan programmes and explains next steps | Bank of Agriculture, NIRSAL, cooperative registries |
-| Pest and Disease | Scans for crop specific pest threats based on weather and season, recommends action | Agricultural research data |
+| Soil and Crop | Determines soil type, pH, nutrient profile, and crop suitability score | **iSDA Africa Soil API** (`api.isda-africa.com`, `api.isdasoil.org`), Nigerian state-crop matching tables |
+| Weather | Produces a 7 day forecast, flags flood and drought risk, recommends planting day | **NASA POWER** (`power.larc.nasa.gov`) for historical climatology, **Open-Meteo** (`api.open-meteo.com`) for short-range forecast |
+| Market Price | Returns current crop price, best regional markets, and price trends | **WFP HungerMap** (`api.hungermapdata.org`) Nigeria market prices, optional **Brave Search API** for live commodity news |
+| Finance | Matches the farmer with eligible loan programmes and explains next steps | Curated registry: Bank of Agriculture, NIRSAL, CBN Anchor Borrowers, cooperatives |
+| Pest and Disease | Scans for crop specific pest threats based on weather and season, recommends action | Agricultural research datasets, weather-conditioned pest rule base |
 
-Each agent returns a confidence label (high, medium, low) so the synthesized plan can be transparent about which recommendations rest on solid data versus reasoned estimation.
+**Geocoding** of farmer-supplied LGA / state is done via **Open-Meteo Geocoding** and **OpenStreetMap Nominatim** (`nominatim.openstreetmap.org`).
+
+**Synthesis** is performed by an LLM. The Python `agrichain/ai/` agent stack uses the **OpenAI API** (`OPENAI_API_KEY`). The Node.js backend tries an internal ML service first (`ML_SERVICE_URL`) and falls back to the **Anthropic Claude API** if the ML service is unavailable.
+
+**Delivery** uses the **Meta WhatsApp Cloud API** (`graph.facebook.com/v18.0`) for both outbound plans and inbound multi-turn conversation, with **Africa's Talking** (`api.africastalking.com`) available as an SMS fallback.
+
+Each agent returns a confidence label (high, medium, low) so the synthesized plan is transparent about which recommendations rest on solid data versus reasoned estimation.
 
 ---
 
@@ -80,9 +86,29 @@ The brief asks for a recommendation agent that goes beyond collaborative filteri
 
 **Frontend:** React 18, Vite, Tailwind CSS, Motion (Framer Motion successor), React Router, Lucide React. Deployed on Netlify.
 
-**Backend:** Node.js, Express, Anthropic Claude API for synthesis, individual agent modules with live API integrations. Deployed on Railway.
+**Backend (Node.js):** Express, `@anthropic-ai/sdk` (Claude fallback synthesis), Axios, individual agent modules with live API integrations. Deployed on Railway.
 
-**Messaging:** WhatsApp Cloud API (Meta) for both outbound delivery and inbound multi turn conversation.
+**AI prototype (Python):** `agrichain/ai/` — OpenAI Python SDK, httpx, async orchestration, Brave Search, NASA POWER, iSDA, Open-Meteo, Nominatim.
+
+**Messaging:** Meta WhatsApp Cloud API for both outbound delivery and inbound multi turn conversation; Africa's Talking for SMS fallback.
+
+---
+
+## External Data Sources at a Glance
+
+| Source | Used For | Endpoint |
+|---|---|---|
+| NASA POWER | Long-range climate / agroclimatology | `power.larc.nasa.gov/api/temporal/daily/point` |
+| Open-Meteo | Short-range weather forecast | `api.open-meteo.com/v1/forecast` |
+| Open-Meteo Geocoding | Place → lat/lon | `geocoding-api.open-meteo.com/v1/search` |
+| OpenStreetMap Nominatim | Geocoding fallback | `nominatim.openstreetmap.org/search` |
+| iSDA Africa | Soil pH, nutrients, texture | `api.isda-africa.com/v1/soilproperty`, `api.isdasoil.org/v1/properties` |
+| WFP HungerMap | Nigerian commodity / market prices | `api.hungermapdata.org/v2/foodsecurity/country/NGA/marketprices` |
+| Brave Search | Live commodity / agronomy news lookup | `api.search.brave.com/res/v1/web/search` |
+| Meta WhatsApp Cloud API | Plan delivery + inbound webhook | `graph.facebook.com/v18.0` |
+| Africa's Talking | SMS fallback | `api.africastalking.com/version1/messaging` |
+| OpenAI API | LLM synthesis (Python agents) | `api.openai.com` |
+| Anthropic Claude API | LLM synthesis fallback (Node backend) | `api.anthropic.com` |
 
 ---
 
@@ -90,17 +116,17 @@ The brief asks for a recommendation agent that goes beyond collaborative filteri
 
 ### Prerequisites
 
-You will need Node.js 18 or higher and npm. The backend requires an Anthropic Claude API key for synthesis; WhatsApp delivery and the optional iSDA/Africa's Talking integrations are off by default if their keys are absent.
+Node.js 18+ and npm for the backend and frontend. Python 3.10+ for the `agrichain/ai/` prototype. An OpenAI API key for the Python agents; the Node backend will use Claude as a fallback synthesizer if `CLAUDE_API_KEY` is set, otherwise it returns a deterministic template plan.
 
-### Backend Setup
+### Backend Setup (Node.js)
 
 ```bash
 cd backend
 npm install
 
-# Create a .env file with the following keys
 cat > .env <<'EOF'
-CLAUDE_API_KEY=your_anthropic_key_here
+CLAUDE_API_KEY=optional_anthropic_key_for_fallback
+ML_SERVICE_URL=https://your-ml-service.example.com
 WHATSAPP_TOKEN=your_meta_whatsapp_token
 WHATSAPP_PHONE_NUMBER_ID=your_meta_phone_number_id
 WHATSAPP_VERIFY_TOKEN=any_string_you_choose
@@ -114,7 +140,7 @@ EOF
 npm start
 ```
 
-The backend will start on `http://localhost:8000`. Weather data is fetched from the Open-Meteo API, which requires no key.
+Open-Meteo, NASA POWER, WFP HungerMap, and OpenStreetMap Nominatim require no keys.
 
 ### Frontend Setup
 
@@ -122,13 +148,30 @@ The backend will start on `http://localhost:8000`. Weather data is fetched from 
 cd frontend
 npm install
 
-# Create a .env file pointing to your backend
-echo "VITE_API_URL=http://localhost:8000" >> .env
+echo "VITE_API_URL=http://localhost:8000" > .env
 
 npm run dev
 ```
 
-The frontend will start on `http://localhost:5173`. Open it in your browser.
+The frontend will start on `http://localhost:5173`.
+
+### Python AI Prototype Setup
+
+```bash
+cd agrichain/ai
+pip install -r requirements.txt
+
+cat > .env <<'EOF'
+OPENAI_API_KEY=sk-your-openai-key
+BRAVE_API_KEY=optional_brave_search_key
+RESEND_API_KEY=optional_resend_email_key
+BACKEND_HOST=0.0.0.0
+BACKEND_PORT=8000
+DEMO_MODE=True
+EOF
+
+python main.py
+```
 
 ---
 
@@ -192,7 +235,7 @@ Returns `{ "status": "healthy" }` if the server is reachable.
 
 1. Open the live deployment at https://gilded-salmiakki-9cfe3e.netlify.app
 2. Either fill out the 5 step form, or click one of the three sample farmer profiles (Chukwuemeka, Adaeze, or Bashir) for instant results
-3. Wait roughly 30 seconds for the agents to complete and Claude to synthesize the plan
+3. Wait roughly 30 seconds for the agents to complete and the LLM to synthesize the plan
 4. Click any agent card to see the underlying data and confidence level
 5. Click "Send to WhatsApp" to deliver the plan to a Nigerian number
 
@@ -204,11 +247,11 @@ Returns `{ "status": "healthy" }` if the server is reachable.
 agri-chain/
 ├── backend/         Node.js + Express API, orchestrator, and the five agents
 │   ├── agents/      soilAgent, weatherAgent, marketAgent, financeAgent, pestAgent
-│   ├── orchestrator/  parallel dispatch + Claude synthesis
+│   ├── orchestrator/  parallel dispatch + LLM synthesis
 │   ├── routes/      /api/farm-plan and /webhook/whatsapp
 │   └── server.js    Express entry point
 ├── frontend/        React 18 + Vite + Tailwind web app (Netlify)
-├── agrichain/ai/    Experimental Python agent prototypes and tests
+├── agrichain/ai/    Python multi-agent prototype (OpenAI, NASA POWER, iSDA, Brave)
 └── README.md
 ```
 
@@ -216,4 +259,4 @@ agri-chain/
 
 ## License
 
-This codebase is submitted for the DSN x BCT LLM Agent Challenge 3.0 and is intended for evaluation by the organizing judges. All third party APIs (Anthropic, Meta WhatsApp, Open-Meteo) are used under their respective terms.
+This codebase is submitted for the DSN x BCT LLM Agent Challenge 3.0 and is intended for evaluation by the organizing judges. All third party APIs (OpenAI, Anthropic, Meta WhatsApp, Africa's Talking, NASA POWER, Open-Meteo, iSDA Africa, WFP HungerMap, Brave Search, OpenStreetMap Nominatim) are used under their respective terms.
